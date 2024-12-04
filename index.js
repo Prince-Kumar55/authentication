@@ -25,7 +25,6 @@ app.post("/signup", (req,res)=>{
     res.json({
         massage: "You are signed up"
     })
-    console.log(users);
 });
 app.post ("/signin", (req,res)=>{
     const username = req.body.username;
@@ -48,12 +47,11 @@ app.post ("/signin", (req,res)=>{
             message: "Invalid username or password"
     })
 }
-console.log(users)
 });
 
 app.get("/me", (req,res) => {
     const token = req.headers.token
-    const foundUser = null;
+    let foundUser = null;
 
     for (let i = 0; i < users.length; i++) {
         if (users[i].token == token) {
