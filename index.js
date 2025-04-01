@@ -7,9 +7,13 @@ app.use(express.json());
 
 const users = [];
 
-app.post("/signup", (req,res)=>{
-    const username = req.body.username;
-    const password = req.body.password;
+function logger(req, res, next) {
+    console.log(req.method + " request came " );
+    next();
+};
+
+app.post("/signup", logger,(req,res)=>{
+    const {username,password} = req.body;
     
     users.push({
         username: username,
@@ -18,8 +22,8 @@ app.post("/signup", (req,res)=>{
     res.json({
         massage: "You are signed up"
     })
-});
-app.post ("/signin", (req,res)=>{
+}); 
+app.post ("/signin", logger,  (req,res)=>{
     const username = req.body.username;
     const password = req.body.password;
     
@@ -37,7 +41,7 @@ app.post ("/signin", (req,res)=>{
 
        // founduser.token = token;
 
-        res.json({
+        res.status(200).json({
             token: token
         })
     } else {
@@ -47,14 +51,26 @@ app.post ("/signin", (req,res)=>{
 }
 });
 
-app.get("/me", (req,res) => {
-    const token = req.headers.token  // jwt
-    const decodedinformation = jwt.verify(token, JWT_SECRET);
-    const username = decodedinformation.username
+function auth(req, res, next) {
+    const {token} = req.headers;
+    const decodedData  = jwt.verify(token, JWT_SECRET);
+
+    if(decodedData.username){
+        req.username = decodedData.username;    
+        next();
+    }else{
+        res.json({
+        massage: "you are not logged in"
+            })
+        }; 
+}
+
+app.get("/me", logger ,auth, (req,res) => {
 
     let foundUser = null;
+
     for (let i = 0; i < users.length; i++) {
-        if (users[i].username == username) {
+        if (users[i].username === req.username) {
             foundUser = users[i] 
         }
     }
@@ -71,6 +87,17 @@ app.get("/me", (req,res) => {
     }
 })
 
+app.get("/todo", auth, function(req,res) {
+
+})
+
+app.post("/todo", auth, function(req,res) {
+
+})
+
+app.delete("/todo", auth, function(req,res) {
+
+})
 
 app.listen(port, () => {
     console.log(`Server started on port ${port}`);
