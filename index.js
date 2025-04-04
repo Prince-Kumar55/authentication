@@ -12,6 +12,10 @@ function logger(req, res, next) {
     next();
 };
 
+app.get("/", function(req,res){ 
+    res.sendFile(__dirname + "/Public/index.html")
+});
+
 app.post("/signup", logger,(req,res)=>{
     const {username,password} = req.body;
     
